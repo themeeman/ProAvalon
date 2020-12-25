@@ -9,7 +9,7 @@ import { Server } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { transformAndValidate } from '@proavalon/proto';
 import {
-  LobbySocketEvents,
+  LobbyEventType,
   ChatResponse,
   ChatResponseType,
 } from '@proavalon/proto/lobby';
@@ -17,8 +17,8 @@ import {
 import { UsersService } from '../users/users.service';
 import { AllChatService } from '../all-chat/all-chat.service';
 import { SocketUser } from '../users/users.socket';
-import { RoomsService } from '../rooms/rooms.service';
-import { RoomsGateway } from '../rooms/rooms.gateway';
+import { LobbyService } from '../lobby/lobby.service';
+// import { RoomsGateway } from '../rooms/rooms.gateway';
 
 import RedisAdapterService from '../redis-adapter/redis-adapter.service';
 import { OnlinePlayersService } from './online-players/online-players.service';
@@ -35,8 +35,7 @@ export class AuthGateway implements OnGatewayConnection {
     private onlinePlayersService: OnlinePlayersService,
     private onlineSocketsService: OnlineSocketsService,
     private redisAdapter: RedisAdapterService,
-    private roomsService: RoomsService,
-    private roomsGateway: RoomsGateway,
+    private lobbyService: LobbyService, // private roomsGateway: RoomsGateway,
   ) {}
 
   private readonly logger = new Logger(AuthGateway.name);
@@ -112,11 +111,11 @@ export class AuthGateway implements OnGatewayConnection {
     // Successful authentication
     socket.join('lobby');
     // Send them the lobby games
-    this.roomsService.updateLobbyGames(socket);
+    this.lobbyService.updateLobbyGames(socket);
 
     // Let client know that we have finished our checks and that
     // they can now request data if they need.
-    socket.emit(LobbySocketEvents.AUTHORIZED, null);
+    socket.emit(LobbyEventType.AUTHORIZED, null);
 
     // ----------------------------------------------------------
 
@@ -129,9 +128,7 @@ export class AuthGateway implements OnGatewayConnection {
       });
 
       this.allChatService.storeMessage(chatResponse);
-      socket
-        .to('lobby')
-        .emit(LobbySocketEvents.ALL_CHAT_TO_CLIENT, chatResponse);
+      socket.to('lobby').emit(LobbyEventType.ALL_CHAT_TO_CLIENT, chatResponse);
     } catch (err) {
       this.logger.error('Validation failed. Error: ', err);
     }
@@ -145,7 +142,8 @@ export class AuthGateway implements OnGatewayConnection {
     }
 
     // Leave the game if they are in one
-    await this.roomsGateway.handleLeaveGame(socket);
+    // TODO
+    // await this.roomsGateway.handleLeaveGame(socket);
 
     // Remove their record on redis - no need to await
     this.onlineSocketsService.deregister(socket.user.username);
@@ -168,15 +166,13 @@ export class AuthGateway implements OnGatewayConnection {
 
       this.allChatService.storeMessage(chatResponse);
 
-      socket
-        .to('lobby')
-        .emit(LobbySocketEvents.ALL_CHAT_TO_CLIENT, chatResponse);
+      socket.to('lobby').emit(LobbyEventType.ALL_CHAT_TO_CLIENT, chatResponse);
     } catch (err) {
       this.logger.error('Validation failed. Error: ', err);
     }
   }
 
-  @SubscribeMessage(LobbySocketEvents.USER_RECONNECT)
+  @SubscribeMessage(LobbyEventType.USER_RECONNECT)
   async userReconnect(socket: SocketUser) {
     this.logger.log(`${socket.user.username} has reconnected`);
     // Set a new record of their connection.

@@ -3,7 +3,8 @@ import Router from 'next/router';
 import io from 'socket.io-client';
 import Cookie from 'js-cookie';
 import Swal from 'sweetalert2';
-import { LobbySocketEvents } from '@proavalon/proto/lobby';
+import { RoomEventType, transformAndValidateSync } from '@proavalon/proto';
+import { LobbyEventType } from '@proavalon/proto/lobby';
 import { store } from '../store/index';
 import { logout } from '../store/user/actions';
 
@@ -59,9 +60,17 @@ class SocketConnection {
         };
       });
 
-      this.socket.on(LobbySocketEvents.AUTHORIZED, () => {
+      this.socket.on('oops', (data: string) => {
+        Swal.fire({
+          title: 'Oops',
+          text: data,
+          icon: 'error',
+        });
+      });
+
+      this.socket.on(LobbyEventType.AUTHORIZED, () => {
         // Request for stuff here.
-        this.socket.emit(LobbySocketEvents.USER_RECONNECT, null);
+        this.socket.emit(LobbyEventType.USER_RECONNECT, null);
       });
 
       // TODO These should only be activated in lobby or game room.
@@ -104,6 +113,23 @@ class SocketConnection {
       this.socket.emit(event, message, callback);
     } else {
       this.socket.emit(event, message);
+    }
+  };
+
+  emitRoomEvent = (event: RoomEventType, dataIn?: any, type?: any): void => {
+    if (dataIn && type) {
+      const data = {
+        type: event,
+        ...dataIn,
+      };
+
+      transformAndValidateSync(type, data);
+      this.socket.emit(RoomEventType.ROOM_EVENT, data);
+    } else {
+      const data = {
+        type: event,
+      };
+      this.socket.emit(RoomEventType.ROOM_EVENT, data);
     }
   };
 

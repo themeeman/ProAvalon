@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { SocketUser } from '../../../users/users.socket';
 import { emitCommandResponse } from '../../commandResponse';
 import { Command } from '../../commands.types';
-import { RoomsService } from '../../../rooms/rooms.service';
+import { LobbyService } from '../../../lobby/lobby.service';
 
 @Injectable()
 export class MCloseService implements Command {
@@ -10,7 +10,7 @@ export class MCloseService implements Command {
 
   help = '/mclose <gameId> [<gameId> <gameId> ...]: Closes the given games.';
 
-  constructor(private readonly gamesService: RoomsService) {}
+  constructor(private readonly lobbyService: LobbyService) {}
 
   async run(socket: SocketUser, data: string[]) {
     if (data.length === 0) {
@@ -19,12 +19,13 @@ export class MCloseService implements Command {
     }
 
     const promises: (Promise<boolean> | boolean)[] = [];
+
     for (const gameId of data) {
       const gameIdNum = parseInt(gameId, 10);
       if (Number.isNaN(gameIdNum)) {
         promises.push(false);
       } else {
-        promises.push(this.gamesService.closeGame(gameIdNum));
+        promises.push(this.lobbyService.closeGame(gameIdNum));
       }
     }
 
@@ -38,6 +39,6 @@ export class MCloseService implements Command {
       }
     }
 
-    this.gamesService.updateLobbyGames();
+    this.lobbyService.updateLobbyGames();
   }
 }

@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { RedisSocketIoAdapter } from './util/redisSocketIoAdapter';
+
+const logger = new Logger('Main');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +19,10 @@ async function bootstrap() {
     }),
   );
   app.useWebSocketAdapter(new RedisSocketIoAdapter(app));
+
+  process.on('unhandledRejection', (reason, p) => {
+    logger.error(`Unhandled rejection at: Promise ${p}, reason: ${reason}`);
+  });
 
   await app.listen(3001);
 }

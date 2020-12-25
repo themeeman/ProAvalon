@@ -9,7 +9,7 @@ import {
   Alliance,
 } from '@proavalon/proto/game';
 import { ROLES } from './game-assemblages';
-import { PlayerInfo } from '../room/rooms-machine-types';
+import { PlayerData } from '../../types';
 
 export type AllComponents =
   | CPlayer
@@ -34,7 +34,7 @@ export class CPlayer extends Component {
   satDown: boolean;
   gameDataToUser: GameData;
 
-  constructor(playerInfo: PlayerInfo) {
+  constructor(playerInfo: PlayerData) {
     super('CPlayer');
     this.socketId = playerInfo.socketId;
     this.displayUsername = playerInfo.displayUsername;

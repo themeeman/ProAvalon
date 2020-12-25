@@ -1,12 +1,12 @@
 import { transformAndValidate } from '@proavalon/proto';
-import { LobbySocketEvents, ChatResponse } from '@proavalon/proto/lobby';
-import { RoomSocketEvents } from '@proavalon/proto/room';
+import { LobbyEventType, ChatResponse } from '@proavalon/proto/lobby';
+import { RoomEventType } from '@proavalon/proto/room';
 import { store } from '../store';
 import { receivedMessage } from '../store/chat/actions';
 
 export const SetSocketChatEvents = (socket: SocketIOClient.Socket): void => {
   socket.on(
-    LobbySocketEvents.ALL_CHAT_TO_CLIENT,
+    LobbyEventType.ALL_CHAT_TO_CLIENT,
     async (chatResponse: ChatResponse) => {
       try {
         const chatRes = await transformAndValidate(ChatResponse, chatResponse);
@@ -18,7 +18,7 @@ export const SetSocketChatEvents = (socket: SocketIOClient.Socket): void => {
   );
 
   socket.on(
-    RoomSocketEvents.ROOM_CHAT_TO_CLIENT,
+    RoomEventType.ROOM_CHAT_TO_CLIENT,
     async (chatResponse: ChatResponse): Promise<void> => {
       try {
         const chatRes = await transformAndValidate(ChatResponse, chatResponse);

@@ -2,15 +2,22 @@ import { IsDefined, IsString, IsDate, IsEnum, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 import 'reflect-metadata';
 import { MissionOutcome } from './game';
+import { GameMode } from './room';
 
-export enum LobbySocketEvents {
+export enum LobbyEventType {
+  LOBBY_EVENT = 'LOBBY_EVENT',
+
   AUTHORIZED = 'AUTHORIZED',
+
   ALL_CHAT_TO_CLIENT = 'ALL_CHAT_TO_CLIENT',
   ALL_CHAT_TO_SERVER = 'ALL_CHAT_TO_SERVER',
+
   ONLINE_PLAYERS = 'ONLINE_PLAYERS',
   USER_RECONNECT = 'USER_RECONNECT',
 
   UPDATE_LOBBY_ROOMS = 'UPDATE_LOBBY_ROOMS',
+
+  CREATE_ROOM = 'CREATE_ROOM',
 }
 
 export class ChatRequest {
@@ -69,8 +76,8 @@ export class LobbyRoomData {
   @IsString()
   host!: string;
 
-  @IsString()
-  mode!: string;
+  @IsEnum(GameMode)
+  mode!: GameMode;
 
   @IsNumber()
   numSpectators!: number;

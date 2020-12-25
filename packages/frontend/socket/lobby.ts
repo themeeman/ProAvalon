@@ -1,11 +1,11 @@
 import { transformAndValidate } from '@proavalon/proto';
-import { LobbySocketEvents, LobbyRoomData } from '@proavalon/proto/lobby';
+import { LobbyEventType, LobbyRoomData } from '@proavalon/proto/lobby';
 import { store } from '../store';
 import { setLobbyGames } from '../store/lobby/games/actions';
 
 export const SetLobbyEvents = (socket: SocketIOClient.Socket): void => {
   socket.on(
-    LobbySocketEvents.UPDATE_LOBBY_ROOMS,
+    LobbyEventType.UPDATE_LOBBY_ROOMS,
     async (lobbyGames: LobbyRoomData[]) => {
       try {
         console.log(lobbyGames); //eslint-disable-line

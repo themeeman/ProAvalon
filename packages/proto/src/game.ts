@@ -7,7 +7,8 @@ import {
 } from 'class-validator';
 import 'reflect-metadata';
 
-export enum GameSocketEvents {
+export enum GameEventType {
+  GAME_EVENT = 'GAME_EVENT',
   UPDATE_GAME = 'UPDATE_GAME',
   PICK = 'PICK',
   VOTE_TEAM = 'VOTE_TEAM',

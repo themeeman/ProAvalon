@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
 import { useSelector } from 'react-redux';
-import { RoomSocketEvents } from '@proavalon/proto/room';
+import { RoomEventType } from '@proavalon/proto/room';
 import { RootState } from '../../store';
 import { GameButton } from './gameButton';
 
@@ -14,10 +14,10 @@ type Props = {
 const buttonActions = {
   waiting: {
     green: (): void => {
-      socket.emit(RoomSocketEvents.SIT_DOWN);
+      socket.emitRoomEvent(RoomEventType.SIT_DOWN);
     },
     red: (): void => {
-      socket.emit(RoomSocketEvents.STAND_UP);
+      socket.emitRoomEvent(RoomEventType.STAND_UP);
     },
   },
   game: {

@@ -13,7 +13,7 @@ import { AllChatModule } from '../all-chat/all-chat.module';
 import { RedisAdapterModule } from '../redis-adapter/redis-adapter.module';
 import { OnlinePlayersModule } from './online-players/online-players.module';
 import { OnlineSocketsModule } from './online-sockets/online-sockets.module';
-import { RoomsModule } from '../rooms/rooms.module';
+import { LobbyModule } from '../lobby/lobby.module';
 
 @Module({
   imports: [
@@ -27,7 +27,7 @@ import { RoomsModule } from '../rooms/rooms.module';
     RedisAdapterModule,
     OnlinePlayersModule,
     OnlineSocketsModule,
-    RoomsModule,
+    LobbyModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthGateway, LocalStrategy, JwtStrategy],

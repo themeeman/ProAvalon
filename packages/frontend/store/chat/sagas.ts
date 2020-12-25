@@ -4,19 +4,20 @@ import { call, put, takeLatest, fork } from 'redux-saga/effects';
 import {
   ChatResponse,
   ChatRequest,
-  LobbySocketEvents,
+  LobbyEventType,
 } from '@proavalon/proto/lobby';
-import { RoomSocketEvents } from '@proavalon/proto/room';
+import { RoomEventType } from '@proavalon/proto/room';
 
 import { socket } from '../../socket';
 
 import { getBackendUrl } from '../../utils/getEnvVars';
 import { setMessages } from './actions';
 import { GET_ALL_CHAT, EMIT_MESSAGE, IEmitMessageAction } from './types';
+import { clientCommand } from './clientCommand';
 
-function get(
+const get = async (
   path: string,
-): Promise<AxiosResponse<ChatResponse[]> | ChatResponse[]> {
+): Promise<AxiosResponse<ChatResponse[]> | ChatResponse[]> => {
   const url = `${getBackendUrl()}${path}`;
 
   return axios({
@@ -24,7 +25,7 @@ function get(
     url,
     // responseType: 'arraybuffer',
   }).then((resp) => resp.data);
-}
+};
 
 function* emitMessage({
   payload: { type, message },
@@ -33,10 +34,14 @@ function* emitMessage({
     text: message,
   };
 
+  if (clientCommand(message)) {
+    return;
+  }
+
   const event =
     type === 'lobby'
-      ? LobbySocketEvents.ALL_CHAT_TO_SERVER
-      : RoomSocketEvents.ROOM_CHAT_TO_SERVER;
+      ? LobbyEventType.ALL_CHAT_TO_SERVER
+      : RoomEventType.ROOM_CHAT_TO_SERVER;
 
   yield call(socket.emit, event, msg);
 }

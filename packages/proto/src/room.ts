@@ -15,8 +15,9 @@ export enum GameMode {
   AVALON = 'AVALON',
 }
 
-export enum RoomSocketEvents {
-  CREATE_ROOM = 'CREATE_ROOM',
+export enum RoomEventType {
+  ROOM_EVENT = 'ROOM_EVENT',
+
   START_GAME = 'START_GAME',
 
   JOIN_ROOM = 'JOIN_ROOM',
@@ -38,7 +39,7 @@ export enum RoomState {
   finished = 'finished',
 }
 
-export class PlayerData {
+export class PlayerDataClient {
   @IsString()
   displayUsername!: string;
 
@@ -46,7 +47,7 @@ export class PlayerData {
   avatarLink?: string;
 }
 
-export class RoomData {
+export class RoomDataClient {
   @IsInt()
   id!: number;
 
@@ -66,7 +67,7 @@ export class RoomData {
   roles!: string[];
 
   @ValidateNested({ each: true })
-  playerData!: PlayerData[];
+  playerData!: PlayerDataClient[];
 
   @ValidateNested({ each: true })
   spectatorData!: OnlinePlayer[];
@@ -95,7 +96,7 @@ export class CreateRoomDto {
   mode!: GameMode;
 }
 
-export class GameIdDto {
+export class RoomIdDto {
   @IsNumber()
-  id!: number;
+  roomId!: number;
 }

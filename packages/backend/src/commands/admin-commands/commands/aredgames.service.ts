@@ -30,7 +30,9 @@ export class ARedisGamesService implements Command {
         );
       } else {
         const gameId = data[0];
-        const gameString = await this.redisClient.client.get(`game:${gameId}`);
+        const gameString = await this.redisClient.client.get(
+          `gameData:${gameId}`,
+        );
         emitCommandResponse(`Game ${gameId}: ${gameString}`, socket);
       }
     } catch (e) {

@@ -3,10 +3,10 @@ import { RedisAdapterModule } from '../../redis-adapter/redis-adapter.module';
 import { ModCommandsService } from './mod-commands.service';
 import { MTestService } from './commands/mtest.service';
 import { MCloseService } from './commands/mclose.service';
-import { RoomsModule } from '../../rooms/rooms.module';
+import { LobbyModule } from '../../lobby/lobby.module';
 
 @Module({
-  imports: [RedisAdapterModule, RoomsModule],
+  imports: [RedisAdapterModule, LobbyModule],
   providers: [ModCommandsService, MTestService, MCloseService],
   exports: [ModCommandsService],
 })

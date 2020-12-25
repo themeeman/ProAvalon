@@ -7,7 +7,7 @@ import {
 import { Server } from 'socket.io';
 import { transformAndValidate } from '@proavalon/proto';
 import {
-  LobbySocketEvents,
+  LobbyEventType,
   ChatRequest,
   ChatResponse,
   ChatResponseType,
@@ -28,7 +28,7 @@ export class AllChatGateway {
     private commandsService: CommandsService,
   ) {}
 
-  @SubscribeMessage(LobbySocketEvents.ALL_CHAT_TO_SERVER)
+  @SubscribeMessage(LobbyEventType.ALL_CHAT_TO_SERVER)
   async handleAllChat(socket: SocketUser, chatRequest: ChatRequest) {
     if (chatRequest.text) {
       // Commands
@@ -54,7 +54,7 @@ export class AllChatGateway {
 
         this.server
           .to('lobby')
-          .emit(LobbySocketEvents.ALL_CHAT_TO_CLIENT, chatResponse);
+          .emit(LobbyEventType.ALL_CHAT_TO_CLIENT, chatResponse);
       } catch (err) {
         this.logger.error('Validation failed. Error: ', err);
       }
