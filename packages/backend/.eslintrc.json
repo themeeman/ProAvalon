@@ -68,7 +68,8 @@
       "LabeledStatement",
       "WithStatement"
     ],
-    "no-param-reassign": ["error", { "props": false }]
+    "no-param-reassign": ["error", { "props": false }],
+    "max-classes-per-file": "off"
   },
   "overrides": [
     {

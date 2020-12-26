@@ -1,5 +1,10 @@
 import { Logger } from '@nestjs/common';
-import { Event, LobbyRoomData, ChatResponseType } from '@proavalon/proto';
+import {
+  Event,
+  LobbyRoomData,
+  ChatResponseType,
+  transformAndValidateSync,
+} from '@proavalon/proto';
 import {
   RoomEventType,
   CreateRoomDto,
@@ -8,7 +13,7 @@ import {
   RoomState,
 } from '@proavalon/proto/room';
 import { SocketUser } from '../users/users.socket';
-import { RoomData } from './types';
+import { FullRoomData, RoomData } from './types';
 
 import { sitDown } from './roomMethods/sitDown';
 import { standUp } from './roomMethods/standUp';
@@ -19,11 +24,13 @@ import { getSocketRoomKeyFromId } from '../util/socketKeyUtil';
 
 export default class Room {
   private readonly logger: Logger;
-  private data: RoomData;
+  private data: FullRoomData;
 
   constructor(gameString: string) {
     this.logger = new Logger(Room.name);
     this.data = JSON.parse(gameString);
+
+    transformAndValidateSync(RoomData, this.data.room);
 
     this.logger.debug('Starting Room constructor');
   }
@@ -43,17 +50,22 @@ export default class Room {
     };
   }
 
-  static async createNewGameState(
+  static createNewGameState(
     socket: SocketUser,
     _data: CreateRoomDto,
     id: number,
-  ): Promise<RoomData> {
+  ): FullRoomData {
     return {
       room: {
+        id,
+        state: RoomState.waiting,
+        host: socket.user.displayUsername,
+        mode: GameMode.AVALON,
+        roles: ['Assassin', 'Merlin'],
         players: [],
         spectators: [],
-        host: socket.user.displayUsername,
-        id,
+        kickedPlayers: [],
+        gameBarMsg: 'Waiting',
       },
     };
   }
@@ -67,16 +79,18 @@ export default class Room {
       displayUsername: player.displayUsername,
     }));
 
+    const roomData = this.data.room;
+
     return {
-      id: this.data.room.id,
-      state: RoomState.waiting,
-      host: this.data.room.host,
-      mode: GameMode.AVALON,
-      roles: ['merlin', 'assassin'],
+      id: roomData.id,
+      state: roomData.state,
+      host: roomData.host,
+      mode: roomData.mode,
+      roles: roomData.roles,
       playerData,
       spectatorData,
-      kickedPlayers: ['kickedUsername'],
-      gameBarMsg: 'asdf',
+      kickedPlayers: roomData.kickedPlayers,
+      gameBarMsg: roomData.gameBarMsg,
     };
   }
 
@@ -89,14 +103,11 @@ export default class Room {
     const roomId = this.data.room.id;
     const roomData = this.getRoomDataToUser();
 
-    console.log('Emitting to ', roomId);
-
     return redisAdapter.server
       .to(getSocketRoomKeyFromId(roomId))
       .emit(RoomEventType.UPDATE_ROOM, roomData);
   }
 
-  // TODO Data structure
   async event(
     socket: SocketUser,
     event: Event,

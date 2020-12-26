@@ -1,12 +1,15 @@
 import { transformAndValidate } from '@proavalon/proto';
-import { RoomData, RoomEventType } from '@proavalon/proto/room';
+import { RoomDataClient, RoomEventType } from '@proavalon/proto/room';
 import { store } from '../store';
 import { setRoom } from '../store/room/actions';
 
 export const SetRoomEvents = (socket: SocketIOClient.Socket): void => {
-  socket.on(RoomEventType.UPDATE_ROOM, async (roomData: RoomData) => {
+  socket.on(RoomEventType.UPDATE_ROOM, async (roomData: RoomDataClient) => {
     try {
-      const roomDataValidated = await transformAndValidate(RoomData, roomData);
+      const roomDataValidated = await transformAndValidate(
+        RoomDataClient,
+        roomData,
+      );
       store.dispatch(setRoom(roomDataValidated));
 
       console.log('Received room data'); // eslint-disable-line

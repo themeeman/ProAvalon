@@ -1,7 +1,7 @@
-import { RoomData } from '@proavalon/proto/room';
+import { RoomDataClient } from '@proavalon/proto/room';
 import { RoomActionTypes, SET_ROOM } from './types';
 
-export const setRoom = (payload: RoomData): RoomActionTypes => {
+export const setRoom = (payload: RoomDataClient): RoomActionTypes => {
   return {
     type: SET_ROOM,
     payload,

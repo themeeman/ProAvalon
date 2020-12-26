@@ -1,23 +1,53 @@
-import { Event, ChatResponseType } from '@proavalon/proto';
+import { Event, ChatResponseType, GameMode, RoomState } from '@proavalon/proto';
+import { IsString, IsEnum, IsInt } from 'class-validator';
 import { SocketUser } from '../users/users.socket';
 
-export interface PlayerData {
-  username: string;
-  displayUsername: string;
-  socketId: string;
+export class PlayerData {
+  @IsString()
+  username!: string;
+
+  @IsString()
+  displayUsername!: string;
+
+  @IsString()
+  socketId!: string;
 }
 
-export interface RoomData {
-  room: {
-    id: number;
-    host: string;
-    players: PlayerData[];
-    spectators: PlayerData[];
-  };
+export class RoomData {
+  @IsInt()
+  id!: number;
+
+  @IsEnum(RoomState)
+  state!: RoomState;
+
+  @IsString()
+  host!: string;
+
+  @IsEnum(GameMode)
+  mode!: GameMode;
+
+  @IsString({ each: true })
+  roles!: string[];
+
+  @IsEnum(PlayerData, { each: true })
+  players!: PlayerData[];
+
+  @IsEnum(PlayerData, { each: true })
+  spectators!: PlayerData[];
+
+  @IsString({ each: true })
+  kickedPlayers!: string[];
+
+  @IsString()
+  gameBarMsg!: string;
+}
+
+export class FullRoomData {
+  room!: RoomData;
 }
 
 export type EventFunc = (
-  roomData: RoomData,
+  roomData: FullRoomData,
   socket: SocketUser,
   event: Event,
   sendChatToRoom: (text: string, type: ChatResponseType) => void,

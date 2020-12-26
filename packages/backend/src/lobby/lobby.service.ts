@@ -62,11 +62,7 @@ export class LobbyService {
 
     // Create the game state and save in Redis
     try {
-      const newGameState = await Room.createNewGameState(
-        socket,
-        data,
-        nextGameNum,
-      );
+      const newGameState = Room.createNewGameState(socket, data, nextGameNum);
 
       await this.redisClientService.client.set(
         `gameData:${nextGameNum}`,

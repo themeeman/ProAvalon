@@ -21,7 +21,9 @@ async function bootstrap() {
   app.useWebSocketAdapter(new RedisSocketIoAdapter(app));
 
   process.on('unhandledRejection', (reason, p) => {
-    logger.error(`Unhandled rejection at: Promise ${p}, reason: ${reason}`);
+    logger.error(
+      `Unhandled rejection at: Promise ${JSON.stringify(p)}, reason: ${reason}`,
+    );
   });
 
   await app.listen(3001);
