@@ -1,4 +1,4 @@
-import { Event } from '@proavalon/proto';
+import { Event, ChatResponseType } from '@proavalon/proto';
 import { SocketUser } from '../users/users.socket';
 
 export interface PlayerData {
@@ -20,4 +20,5 @@ export type EventFunc = (
   roomData: RoomData,
   socket: SocketUser,
   event: Event,
-) => Promise<void>;
+  sendChatToRoom: (text: string, type: ChatResponseType) => void,
+) => boolean | Promise<boolean>;

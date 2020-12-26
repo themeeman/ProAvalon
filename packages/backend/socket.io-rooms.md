@@ -2,4 +2,4 @@
 
 Key:                            Value:
 lobby                           All players in lobby are subscribed to this.
-game:<id>                       The game room
+room:<id>                       The game room key

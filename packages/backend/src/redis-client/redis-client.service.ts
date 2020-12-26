@@ -4,7 +4,7 @@ import * as util from 'util';
 import { REDIS_HOST, REDIS_PORT } from '../util/getEnvVars';
 
 @Injectable()
-export default class RedisClientService implements OnModuleDestroy {
+export class RedisClientService implements OnModuleDestroy {
   client: Redis.Redis;
 
   private readonly logger = new Logger(RedisClientService.name);

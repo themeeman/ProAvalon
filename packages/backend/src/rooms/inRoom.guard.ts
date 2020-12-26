@@ -1,6 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Event, RoomEventType } from '@proavalon/proto';
 import { SocketUser } from '../users/users.socket';
+import { getRoomIdFromSocketKey } from '../util/socketKeyUtil';
 
 const getRoomIdFromSocketRooms = (socket: SocketUser) => {
   // Get the user's possible game rooms
@@ -14,9 +15,8 @@ const getRoomIdFromSocketRooms = (socket: SocketUser) => {
     );
   }
 
-  // socket.io-redis room name: 'game:<id>'
   const roomKey = gameRooms[0];
-  const gameId = parseInt(roomKey.replace('game:', ''), 10);
+  const gameId = getRoomIdFromSocketKey(roomKey);
 
   return gameId;
 };

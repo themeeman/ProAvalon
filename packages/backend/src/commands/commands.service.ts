@@ -36,7 +36,11 @@ export class CommandsService {
     };
   }
 
-  runCommand(text: string, socket: SocketUser) {
+  run(socket: SocketUser, text: string): boolean {
+    if (text[0] !== '/') {
+      return false;
+    }
+
     // Get first word excluding the initial slash
     const splitted = text.split(' ');
     const command = splitted[0].substring(1);
@@ -58,5 +62,7 @@ export class CommandsService {
 
       socket.emit(LobbyEventType.ALL_CHAT_TO_CLIENT, res);
     }
+
+    return true;
   }
 }

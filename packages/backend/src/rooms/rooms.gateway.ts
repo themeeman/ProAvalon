@@ -3,12 +3,13 @@ import {
   WebSocketServer,
   SubscribeMessage,
 } from '@nestjs/websockets';
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Event } from '@proavalon/proto';
 import { RoomEventType } from '@proavalon/proto/room';
 import { Server } from 'socket.io';
 
 import { RoomsService } from './rooms.service';
+import { RoomChatInterceptor } from './room-chat.interceptor';
 import { SocketUser } from '../users/users.socket';
 import { InRoom } from './inRoom.guard';
 
@@ -26,7 +27,13 @@ export class RoomsGateway {
   }
 
   @SubscribeMessage(RoomEventType.ROOM_EVENT)
+  @UseInterceptors(RoomChatInterceptor)
   async roomEvent(socket: SocketUser, event: Event) {
-    this.roomsService.event(socket, event);
+    const res = await this.roomsService.event(socket, event);
+
+    if (res === true) {
+      return 'OK';
+    }
+    return 'FAIL';
   }
 }

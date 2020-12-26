@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { Event, LobbyRoomData } from '@proavalon/proto';
+import { Event, LobbyRoomData, ChatResponseType } from '@proavalon/proto';
 import {
   RoomEventType,
   CreateRoomDto,
@@ -14,7 +14,8 @@ import { sitDown } from './roomMethods/sitDown';
 import { standUp } from './roomMethods/standUp';
 import { join } from './roomMethods/join';
 import { leave } from './roomMethods/leave';
-import RedisAdapterService from '../redis-adapter/redis-adapter.service';
+import { RedisAdapterService } from '../redis-adapter/redis-adapter.service';
+import { getSocketRoomKeyFromId } from '../util/socketKeyUtil';
 
 export default class Room {
   private readonly logger: Logger;
@@ -91,26 +92,38 @@ export default class Room {
     console.log('Emitting to ', roomId);
 
     return redisAdapter.server
-      .to(`game:${roomId}`)
+      .to(getSocketRoomKeyFromId(roomId))
       .emit(RoomEventType.UPDATE_ROOM, roomData);
   }
 
   // TODO Data structure
-  async event(socket: SocketUser, event: Event): Promise<void> {
+  async event(
+    socket: SocketUser,
+    event: Event,
+    sendChatToRoom: (text: string, type: ChatResponseType) => void,
+  ): Promise<boolean> {
     if (event.type === RoomEventType.JOIN_ROOM) {
-      join(this.data, socket, event);
-    } else if (event.type === RoomEventType.LEAVE_ROOM) {
-      leave(this.data, socket, event);
-    } else if (event.type === RoomEventType.SIT_DOWN) {
-      sitDown(this.data, socket, event);
-    } else if (event.type === RoomEventType.STAND_UP) {
-      standUp(this.data, socket, event);
-    } else if (event.type === RoomEventType.START_GAME) {
-      // TODO
-    } else if (event.type === RoomEventType.ROOM_CHAT_TO_CLIENT) {
-      // TODO
-    } else if (event.type === RoomEventType.ROOM_CHAT_TO_SERVER) {
+      return join(this.data, socket, event, sendChatToRoom);
+    }
+    if (event.type === RoomEventType.LEAVE_ROOM) {
+      return leave(this.data, socket, event, sendChatToRoom);
+    }
+    if (event.type === RoomEventType.SIT_DOWN) {
+      return sitDown(this.data, socket, event, sendChatToRoom);
+    }
+    if (event.type === RoomEventType.STAND_UP) {
+      return standUp(this.data, socket, event, sendChatToRoom);
+    }
+    if (event.type === RoomEventType.START_GAME) {
       // TODO
     }
+    if (event.type === RoomEventType.ROOM_CHAT_TO_CLIENT) {
+      // TODO
+    }
+    if (event.type === RoomEventType.ROOM_CHAT_TO_SERVER) {
+      // TODO
+    }
+
+    return false;
   }
 }

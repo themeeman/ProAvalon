@@ -10,7 +10,7 @@ import {
 import { OnlineSocketsService } from '../auth/online-sockets/online-sockets.service';
 
 @WebSocketGateway()
-class RedisAdapterService {
+export class RedisAdapterService {
   @WebSocketServer() server!: Server;
 
   private readonly logger = new Logger(RedisAdapterService.name);
@@ -102,5 +102,3 @@ class RedisAdapterService {
     return Promise.all(promises);
   }
 }
-
-export default RedisAdapterService;

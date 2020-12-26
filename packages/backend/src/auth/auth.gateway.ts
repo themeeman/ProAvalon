@@ -20,7 +20,7 @@ import { SocketUser } from '../users/users.socket';
 import { LobbyService } from '../lobby/lobby.service';
 // import { RoomsGateway } from '../rooms/rooms.gateway';
 
-import RedisAdapterService from '../redis-adapter/redis-adapter.service';
+import { RedisAdapterService } from '../redis-adapter/redis-adapter.service';
 import { OnlinePlayersService } from './online-players/online-players.service';
 import { OnlineSocketsService } from './online-sockets/online-sockets.service';
 

@@ -4,7 +4,7 @@ import { ChatResponseType } from '@proavalon/proto/lobby';
 import { SocketUser } from '../../../users/users.socket';
 import { emitCommandResponse } from '../../commandResponse';
 import { Command, Commands, CommandsWrapper } from '../../commands.types';
-import RedisAdapterService from '../../../redis-adapter/redis-adapter.service';
+import { RedisAdapterService } from '../../../redis-adapter/redis-adapter.service';
 
 class Interaction implements Command {
   command: string;

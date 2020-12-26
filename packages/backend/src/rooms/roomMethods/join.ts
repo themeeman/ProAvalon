@@ -1,7 +1,12 @@
-import { transformAndValidateSync, RoomIdDto } from '@proavalon/proto';
+import {
+  transformAndValidateSync,
+  RoomIdDto,
+  ChatResponseType,
+} from '@proavalon/proto';
+import { getSocketRoomKeyFromId } from '../../util/socketKeyUtil';
 import { EventFunc } from '../types';
 
-export const join: EventFunc = async (roomData, socket, event) => {
+export const join: EventFunc = (roomData, socket, event, sendChatToRoom) => {
   transformAndValidateSync(RoomIdDto, event.data);
 
   const spectators = roomData.room.spectators.filter(
@@ -9,7 +14,7 @@ export const join: EventFunc = async (roomData, socket, event) => {
   );
 
   socket.lastRoomId = roomData.room.id;
-  socket.join(`game:${socket.lastRoomId}`);
+  socket.join(getSocketRoomKeyFromId(socket.lastRoomId));
 
   if (spectators.length !== 0) {
     // TODO
@@ -21,4 +26,11 @@ export const join: EventFunc = async (roomData, socket, event) => {
     username: socket.user.username,
     displayUsername: socket.user.displayUsername,
   });
+
+  sendChatToRoom(
+    `${socket.user.displayUsername} has joined the room.`,
+    ChatResponseType.PLAYER_JOIN_GAME,
+  );
+
+  return true;
 };

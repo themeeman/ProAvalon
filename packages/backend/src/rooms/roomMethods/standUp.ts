@@ -1,6 +1,6 @@
 import { EventFunc } from '../types';
 
-export const standUp: EventFunc = async (data, socket, _event) => {
+export const standUp: EventFunc = (data, socket, _event) => {
   const players = data.room.players.filter(
     (p) => p.username === socket.user.username,
   );
@@ -14,4 +14,6 @@ export const standUp: EventFunc = async (data, socket, _event) => {
   data.room.players = data.room.players.filter(
     (p) => p.username !== socket.user.username,
   );
+
+  return true;
 };

@@ -3,7 +3,7 @@ import { Server } from 'socket.io';
 import { transformAndValidate } from '@proavalon/proto';
 import { OnlinePlayer, LobbyEventType } from '@proavalon/proto/lobby';
 
-import RedisClientService from '../../redis-client/redis-client.service';
+import { RedisClientService } from '../../redis-client/redis-client.service';
 
 @Injectable()
 export class OnlinePlayersService implements OnModuleDestroy {

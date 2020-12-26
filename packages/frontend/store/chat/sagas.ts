@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { SagaIterator } from 'redux-saga';
 import { call, put, takeLatest, fork } from 'redux-saga/effects';
+import { Event } from '@proavalon/proto';
 import {
   ChatResponse,
   ChatRequest,
@@ -30,20 +31,29 @@ const get = async (
 function* emitMessage({
   payload: { type, message },
 }: IEmitMessageAction): SagaIterator {
-  const msg: ChatRequest = {
+  const data: ChatRequest = {
     text: message,
+  };
+
+  const eventType =
+    type === 'lobby'
+      ? LobbyEventType.ALL_CHAT_TO_SERVER
+      : RoomEventType.ROOM_CHAT_TO_SERVER;
+
+  const event: Event = {
+    type: eventType,
+    data,
   };
 
   if (clientCommand(message)) {
     return;
   }
 
-  const event =
-    type === 'lobby'
-      ? LobbyEventType.ALL_CHAT_TO_SERVER
-      : RoomEventType.ROOM_CHAT_TO_SERVER;
-
-  yield call(socket.emit, event, msg);
+  if (type === 'lobby') {
+    yield call(socket.emit, LobbyEventType.LOBBY_EVENT, event);
+  } else {
+    yield call(socket.emit, RoomEventType.ROOM_EVENT, event);
+  }
 }
 
 function* getAllChat(): SagaIterator {

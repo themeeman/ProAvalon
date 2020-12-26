@@ -8,8 +8,8 @@ import {
   LobbyEventType,
 } from '@proavalon/proto';
 
-import RedisAdapterService from '../redis-adapter/redis-adapter.service';
-import RedisClientService from '../redis-client/redis-client.service';
+import { RedisAdapterService } from '../redis-adapter/redis-adapter.service';
+import { RedisClientService } from '../redis-client/redis-client.service';
 import { SocketUser } from '../users/users.socket';
 import Room from '../rooms/room';
 
@@ -22,17 +22,19 @@ export class LobbyService {
     private readonly redisAdapterService: RedisAdapterService,
   ) {}
 
-  async event(socket: SocketUser, event: Event) {
+  async event(socket: SocketUser, event: Event): Promise<any> {
     try {
       if (event.type === LobbyEventType.CREATE_ROOM) {
         this.logger.log('Create game request');
-        await this.createGame(socket, event.data);
+        return await this.createGame(socket, event.data);
       }
     } catch (e) {
       this.logger.error(e);
       // TODO This shouldn't be shown to the user, but good for debugging.
       socket.emit('oops', JSON.stringify(e));
     }
+
+    return undefined;
   }
 
   async createGame(socket: SocketUser, data: CreateRoomDto): Promise<number> {

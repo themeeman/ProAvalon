@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { SocketUser } from '../../../users/users.socket';
 import { emitCommandResponse } from '../../commandResponse';
 import { Command } from '../../commands.types';
-import RedisClientService from '../../../redis-client/redis-client.service';
+import { RedisClientService } from '../../../redis-client/redis-client.service';
 
 @Injectable()
 export class ARedisGamesService implements Command {

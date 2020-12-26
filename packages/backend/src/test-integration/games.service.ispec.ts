@@ -16,7 +16,7 @@ import {
   INestApplication,
   HttpStatus,
   ValidationPipe,
-  // Logger,
+  Logger,
 } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule, JwtService } from '@nestjs/jwt';
@@ -24,7 +24,7 @@ import request from 'supertest';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import Redis from 'ioredis';
-import { transformAndValidateSync } from '@proavalon/proto';
+import { Event } from '@proavalon/proto';
 import {
   LobbyEventType,
   LobbyRoomData,
@@ -33,9 +33,10 @@ import {
 import {
   CreateRoomDto,
   GameMode,
-  RoomData,
+  RoomDataClient,
   RoomState,
   RoomEventType,
+  RoomIdDto,
 } from '@proavalon/proto/room';
 // import * as util from 'util';
 
@@ -117,7 +118,7 @@ describe('GamesSocket', () => {
     jwtService = moduleRef.get<JwtService>(JwtService);
 
     // Uncomment this to see the logs in jest output.
-    // app.useLogger(new Logger());
+    app.useLogger(new Logger());
 
     await app.init();
     await app.listen(0);
@@ -203,16 +204,19 @@ describe('GamesSocket', () => {
     await Promise.all(socketOnAll(sockets, LobbyEventType.AUTHORIZED));
 
     // Create some games concurrently and make sure it is successful.
-    const settings: CreateRoomDto = {
+    const data: CreateRoomDto = {
       mode: GameMode.AVALON,
       joinPassword: undefined,
       maxNumPlayers: 10,
     };
 
-    const data = transformAndValidateSync(CreateRoomDto, settings);
+    const event: Event = {
+      type: LobbyEventType.CREATE_ROOM,
+      data,
+    };
 
-    const result1 = socketEmit(sockets[0], RoomEventType.CREATE_ROOM, data);
-    const result2 = socketEmit(sockets[0], RoomEventType.CREATE_ROOM, data);
+    const result1 = socketEmit(sockets[0], LobbyEventType.LOBBY_EVENT, event);
+    const result2 = socketEmit(sockets[0], LobbyEventType.LOBBY_EVENT, event);
 
     // Should return the game id of the room, which is either 1 or 2
     // but not both the same.
@@ -240,25 +244,35 @@ describe('GamesSocket', () => {
     await Promise.all(socketOnAll(sockets, LobbyEventType.AUTHORIZED));
 
     // Create a game
-    const settings: CreateRoomDto = {
+    const data: CreateRoomDto = {
       mode: GameMode.AVALON,
       joinPassword: undefined,
       maxNumPlayers: 10,
     };
 
-    const data = transformAndValidateSync(CreateRoomDto, settings);
-
-    const gameId = await socketEmit(
-      sockets[0],
-      RoomEventType.CREATE_ROOM,
+    const event: Event = {
+      type: LobbyEventType.CREATE_ROOM,
       data,
-    );
+    };
+
+    const roomId = (await socketEmit(
+      sockets[0],
+      LobbyEventType.LOBBY_EVENT,
+      event,
+    )) as number;
 
     // Join the game
+    const joinData: RoomIdDto = {
+      roomId,
+    };
+
+    const joinEvent: Event = {
+      type: RoomEventType.JOIN_ROOM,
+      data: joinData,
+    };
+
     expect(
-      await socketEmit(sockets[0], RoomEventType.JOIN_ROOM, {
-        id: gameId,
-      }),
+      await socketEmit(sockets[0], RoomEventType.ROOM_EVENT, joinEvent),
     ).toEqual('OK');
 
     // Expect a join message from the other user
@@ -266,9 +280,7 @@ describe('GamesSocket', () => {
 
     // Join the game on other user
     expect(
-      await socketEmit(sockets[1], RoomEventType.JOIN_ROOM, {
-        id: gameId,
-      }),
+      await socketEmit(sockets[1], RoomEventType.ROOM_EVENT, joinEvent),
     ).toEqual('OK');
 
     // Test the join message is received
@@ -281,8 +293,12 @@ describe('GamesSocket', () => {
     // Send a message in game room from any player
     // Everyone except sockets[2] (user: zxcv) should receive it
     socketNotOn(sockets[2], RoomEventType.ROOM_CHAT_TO_CLIENT, done);
-    sockets[0].emit(RoomEventType.ROOM_CHAT_TO_SERVER, {
-      text: 'hello world!',
+
+    sockets[0].emit(RoomEventType.ROOM_EVENT, {
+      type: RoomEventType.ROOM_CHAT_TO_SERVER,
+      data: {
+        text: 'hello world!',
+      },
     });
 
     const messages = await Promise.all(
@@ -301,7 +317,10 @@ describe('GamesSocket', () => {
     // Person in room should see the leave message
     const leaveMsg = socketOn(sockets[1], RoomEventType.ROOM_CHAT_TO_CLIENT);
 
-    sockets[0].emit(RoomEventType.LEAVE_ROOM, { id: gameId });
+    sockets[0].emit(RoomEventType.ROOM_EVENT, {
+      type: RoomEventType.LEAVE_ROOM,
+      data: { roomId },
+    });
 
     expect(await leaveMsg).toEqual(
       expect.objectContaining({
@@ -312,7 +331,7 @@ describe('GamesSocket', () => {
     socketCloseAll(sockets, done);
   }, 5000);
 
-  it('should receive lobby and on game create', async (done) => {
+  it.only('should receive lobby and on game create', async (done) => {
     const jwtToken1 = jwtService.sign({ username: 'asdf' });
     const jwtToken2 = jwtService.sign({ username: 'qwer' });
 
@@ -334,13 +353,16 @@ describe('GamesSocket', () => {
     });
 
     // Create a game
-    const settings: CreateRoomDto = {
+    const data: CreateRoomDto = {
       mode: GameMode.AVALON,
       joinPassword: undefined,
       maxNumPlayers: 10,
     };
 
-    const data = transformAndValidateSync(CreateRoomDto, settings);
+    const event: Event = {
+      type: LobbyEventType.CREATE_ROOM,
+      data,
+    };
 
     {
       // Prepare to catch socket messages
@@ -352,8 +374,8 @@ describe('GamesSocket', () => {
       // Create a game
       const gameId = await socketEmit(
         sockets[0],
-        RoomEventType.CREATE_ROOM,
-        data,
+        LobbyEventType.LOBBY_EVENT,
+        event,
       );
       expect(gameId).toEqual(1);
 
@@ -390,8 +412,8 @@ describe('GamesSocket', () => {
       // Create a game
       const gameId = await socketEmit(
         sockets[1],
-        RoomEventType.CREATE_ROOM,
-        data,
+        LobbyEventType.LOBBY_EVENT,
+        event,
       );
       expect(gameId).toEqual(2);
 
@@ -438,13 +460,16 @@ describe('GamesSocket', () => {
     });
 
     // Create a game
-    const settings: CreateRoomDto = {
+    const data: CreateRoomDto = {
       mode: GameMode.AVALON,
       joinPassword: undefined,
       maxNumPlayers: 10,
     };
 
-    const data = transformAndValidateSync(CreateRoomDto, settings);
+    const event: Event = {
+      type: LobbyEventType.CREATE_ROOM,
+      data,
+    };
 
     // Prepare to catch socket messages
     const promises = [
@@ -455,8 +480,8 @@ describe('GamesSocket', () => {
     // Create a game
     const gameId = await socketEmit(
       sockets[0],
-      RoomEventType.CREATE_ROOM,
-      data,
+      LobbyEventType.LOBBY_EVENT,
+      event,
     );
     expect(gameId).toEqual(1);
 
@@ -493,7 +518,7 @@ describe('GamesSocket', () => {
       }),
     ).toEqual('OK');
 
-    const roomData = (await roomDataPromise) as RoomData;
+    const roomData = (await roomDataPromise) as RoomDataClient;
 
     expect(roomData.id).toEqual(1);
     expect(roomData.host).toEqual('asdf');

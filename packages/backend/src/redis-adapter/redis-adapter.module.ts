@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import RedisAdapterService from './redis-adapter.service';
+import { RedisAdapterService } from './redis-adapter.service';
 import { OnlineSocketsModule } from '../auth/online-sockets/online-sockets.module';
 
 @Module({
