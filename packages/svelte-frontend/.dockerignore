@@ -1,0 +1,10 @@
+.dockerignore
+Dockerfile
+README.md
+/node_modules
+**/@sapper
+.gitignore
+babel.config.js
+jest.config.js
+/__tests__
+/__sapper__

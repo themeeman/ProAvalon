@@ -118,6 +118,16 @@ services:
       - ./packages/frontend:/usr/src/app/packages/frontend
       - ./packages/proto:/usr/src/app/packages/proto
 
+  svelte-frontend:
+    container_name: sevelte-frontend
+    ports:
+      - 3004:3000
+      - '10000:10000'
+    build:
+      context: ./packages/svelte-frontend
+    volumes:
+      - ./packages/svelte-frontend:/usr/src/app/
+
 volumes:
   mongo_data:
   mongo_config:
