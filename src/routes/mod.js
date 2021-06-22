@@ -1,5 +1,5 @@
-import React from 'react';
 import { Router } from 'express';
+import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { isModMiddleware } from './middleware';
 import User from '../models/user';

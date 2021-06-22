@@ -101,28 +101,22 @@
 			
 
 		<div class="myHr"></div>
-			
-
-
 			<div id="statusBarWell" class="center-div well well-sm">
+				<span id="status" style="line-height: 35px;">Waiting for game to start... :P</span>
 
-				<span id="status" style="    line-height: 35px;">Waiting for game to start... :P</span>
+        <div id="report-button-lobby"> 
+          <%- reportButton %>
+        </div>
 
 				<span class="game-buttons-div" style="white-space:nowrap;">
-
 					<button class="btn btn-success" id="green-button">Start!</button>
-
 					<!-- Trigger the modal with a button -->
 					<button type="button" class="btn btn-default hidden" data-toggle="modal" data-target="#roleOptionsModal" id="options-button">
 						<span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
 					</button>
-
 					<button class="btn btn-danger" id="red-button"> <span class="glyphicon glyphicon-remove"></span></button>
 				</span>
-
-
 			</div>
-
 			
 			<div id="tabContainerBig">
 				<div id="tabs1" class="">
@@ -696,5 +690,6 @@
 	<script type="text/javascript" src="<%-getVersionedPath('/scripts/lobby/publicData/avalon.js')%>"></script>
 	<script type="text/javascript" src="<%-getVersionedPath('/scripts/lobby/helper.js')%>"></script>
 
+  <script type="text/javascript" src="<%-getVersionedPath('/dist_webpack/report.bundle.js')%>"></script>
 
 	<% include partials/footer%>
