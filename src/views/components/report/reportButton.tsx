@@ -1,30 +1,42 @@
 import React, { useState } from 'react';
 import { hot } from 'react-hot-loader/root';
+import styled from 'styled-components';
+
 import ReportModal from './reportModal';
 
-declare const socket: any;
+const StyledReportButton = styled.div`
+  color: black;
+  font-weight: bold;
 
-const divStyle = {
-  color: 'red',
-};
+  // rem so that global font size doesn't affect this
+  font-size: 2rem;
 
-// const ReportButton: React.FC<Props> = (props) => {
+  background: orange;
+  border: 1px solid lightcoral;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+
+  &:hover {
+    background: #f09b00;
+  }
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 
 const ReportButton: React.FC = () => {
   const [modalState, setModalState] = useState(false);
 
   return (
-    <div
-      style={divStyle}
+    <StyledReportButton
       onClick={() => {
         setModalState(!modalState);
-        socket.emit('allChatFromClient', {
-          message: 'asdf',
-        });
       }}
     >
-      R{modalState ? <ReportModal /> : null}
-    </div>
+      !{modalState ? <ReportModal /> : null}
+    </StyledReportButton>
   );
 };
 
