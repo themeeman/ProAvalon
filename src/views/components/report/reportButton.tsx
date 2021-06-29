@@ -9,12 +9,13 @@ const StyledReportButton = styled.div`
   font-weight: bold;
 
   // rem so that global font size doesn't affect this
-  font-size: 2rem;
+  font-size: 1.7rem;
 
   background: orange;
   border: 1px solid lightcoral;
-  width: 30px;
-  height: 30px;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
   border-radius: 50%;
 
   &:hover {
