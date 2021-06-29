@@ -168,6 +168,11 @@ router.post(
 );
 
 router.get('/loginSuccess', async (req, res) => {
+  if (!req.user) {
+    res.redirect('/');
+    return;
+  }
+
   if (req.user.lastLoggedIn === undefined) {
     req.user.lastLoggedIn = [new Date()];
   }

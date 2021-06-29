@@ -13,18 +13,18 @@ import { isTO } from '../modsadmins/tournamentOrganizers';
 import { modOrTOString } from '../modsadmins/modOrTO';
 
 // Get all the gamemodes and their roles/cards/phases.
-const gameModeNames = ['avalon', 'avalonBot'];
+import { GAME_MODE_NAMES } from './gameModeNames';
 
 const gameModeObj: any = {};
-for (let i = 0; i < gameModeNames.length; i++) {
-  gameModeObj[gameModeNames[i]] = {};
+for (let i = 0; i < GAME_MODE_NAMES.length; i++) {
+  gameModeObj[GAME_MODE_NAMES[i]] = {};
 
-  gameModeObj[gameModeNames[i]].Roles =
-    require(`./${gameModeNames[i]}/indexRoles`).default;
-  gameModeObj[gameModeNames[i]].Phases =
-    require(`./${gameModeNames[i]}/indexPhases`).default;
-  gameModeObj[gameModeNames[i]].Cards =
-    require(`./${gameModeNames[i]}/indexCards`).default;
+  gameModeObj[GAME_MODE_NAMES[i]].Roles =
+    require(`./${GAME_MODE_NAMES[i]}/indexRoles`).default;
+  gameModeObj[GAME_MODE_NAMES[i]].Phases =
+    require(`./${GAME_MODE_NAMES[i]}/indexPhases`).default;
+  gameModeObj[GAME_MODE_NAMES[i]].Cards =
+    require(`./${GAME_MODE_NAMES[i]}/indexCards`).default;
 }
 
 /**
@@ -509,7 +509,16 @@ Game.prototype.startGame = function (options) {
   this.pickNum = 1;
   this.missionHistory = [];
 
-  let str = 'Game started with: ';
+  console.log(this.ranked);
+  let str = '';
+  if (this.ranked === true) {
+    str = 'This game is ranked.';
+  } else {
+    str = 'This game is unranked.';
+  }
+  this.sendText(this.allSockets, str, 'gameplay-text');
+
+  str = 'Game started with: ';
   for (let i = 0; i < this.roleKeysInPlay.length; i++) {
     str += `${this.specialRoles[this.roleKeysInPlay[i]].role}, `;
   }
