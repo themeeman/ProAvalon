@@ -1,6 +1,8 @@
 import React from 'react';
 import Modal from 'react-modal';
 
+import ReportForm from './reportForm';
+
 interface ReportModalProps {
   modalIsOpen: boolean;
   closeModal: () => void;
@@ -8,7 +10,7 @@ interface ReportModalProps {
 
 const customStyles = {
   content: {
-    top: '50%',
+    top: '20%',
     left: '50%',
     right: 'auto',
     bottom: 'auto',
@@ -30,13 +32,7 @@ const ReportModal: React.FC<ReportModalProps> = ({
     >
       <button onClick={closeModal}>close</button>
       <div>I am a modal</div>
-      <form>
-        <input />
-        <button>tab navigation</button>
-        <button>stays</button>
-        <button>inside</button>
-        <button>the modal</button>
-      </form>
+      <ReportForm />
     </Modal>
   );
 };
