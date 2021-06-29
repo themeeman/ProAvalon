@@ -28,16 +28,21 @@ const StyledReportButton = styled.div`
 `;
 
 const ReportButton: React.FC = () => {
-  const [modalState, setModalState] = useState(false);
+  const [modalIsOpen, setModalState] = useState(false);
+
+  const toggleModal = () => {
+    setModalState(!modalIsOpen);
+  };
+
+  const closeModal = () => {
+    setModalState(false);
+  };
 
   return (
-    <StyledReportButton
-      onClick={() => {
-        setModalState(!modalState);
-      }}
-    >
-      !{modalState ? <ReportModal /> : null}
-    </StyledReportButton>
+    <>
+      <StyledReportButton onClick={toggleModal}>!</StyledReportButton>
+      <ReportModal modalIsOpen={modalIsOpen} closeModal={closeModal} />
+    </>
   );
 };
 
